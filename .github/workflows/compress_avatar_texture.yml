@@ -35,7 +35,7 @@ jobs:
           path: ./avatar
           ref: ${{ inputs.target_branch }}
       - name: Enable problem matcher
-        run: echo ::add-matcher::check_paths.json
+        run: echo ::add-matcher::./check_paths.json
         working-directory: ./compressor/src/problem_matchers
       - name: Check if specified path exists
         run: sh ./check_paths.sh
@@ -69,7 +69,7 @@ jobs:
         env:
           TEXTURE_PATH: ./${{ inputs.textures_path }}
       - name: Enable problem matcher
-        run: echo ::add-matcher::compress_textures.json
+        run: echo ::add-matcher::./compress_textures.json
         working-directory: ./compressor/src/problem_matchers
       - name: Warn overcolored textures
         run: cat ~/pngquant.log | awk -f ./warn_overcolored_textures.awk
