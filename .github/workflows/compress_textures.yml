@@ -1,0 +1,16 @@
+name: Compress avatar textures
+
+on:
+  push:
+    paths:
+      - textures/**
+      - .github/workflows/compress_textures.yml
+
+jobs:
+  compress_textures:
+    name: Compress avatar textures
+    permissions:
+      contents: write
+    uses: Gakuto1112/FiguraAvatarTextureCompressor/src/compress_avatar_texture.yml@main
+    with:
+      target_branch: ${{ github.ref_name }}
