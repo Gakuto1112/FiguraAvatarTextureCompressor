@@ -1,0 +1,174 @@
+name: Compress avatar textures
+
+on:
+  workflow_call:
+    inputs:
+      target_branch:
+        description: Branch to process texture compression
+        type: string
+        required: false
+        default: ''
+      textures_path:
+        description: Path to textures directory
+        type: string
+        required: false
+        default: textures/
+      models_path:
+        description: Path to models directory
+        type: string
+        required: false
+        default: models/
+
+jobs:
+  check_paths:
+    name: Check if specified path exists
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout compressor repository
+        uses: actions/checkout@v4.2.2
+        with:
+          repository: Gakuto1112/FiguraAvatarTextureCompressor
+          path: ./compressor
+      - name: Checkout avatar repository
+        uses: actions/checkout@v4.2.2
+        with:
+          path: ./avatar
+          ref: ${{ inputs.target_branch }}
+      - name: Enable problem matcher
+        run: echo ::add-matcher::check_paths.json
+        working-directory: ./compressor/src/problem_matchers
+      - name: Check if specified path exists
+        run: sh ./check_paths.sh
+        working-directory: ./compressor/src/scripts
+        env:
+          TEXTURE_PATH: ~/avatar/${{ inputs.textures_path }}
+          MODEL_PATH: ~/avatar/${{ inputs.models_path }}
+      - name: Disable problem matcher
+        run: echo '::remove-matcher owner=check_paths::'
+  compress_textures:
+    name: Compress textures
+    needs: check_paths
+    runs-on: ubuntu-latest
+    outputs:
+      texture_compressed: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
+      compressed_textures: ${{ steps.get_compressed_textures.outputs.compressed_textures }}
+    steps:
+      - name: Checkout compressor repository
+        uses: actions/checkout@v4.2.2
+        with:
+          repository: Gakuto1112/FiguraAvatarTextureCompressor
+          path: ./compressor
+      - name: Checkout avatar repository
+        uses: actions/checkout@v4.2.2
+        with:
+          path: ./avatar
+          ref: ${{ inputs.target_branch }}
+      - name: Compress textures
+        run: sh ~/compressor/src/scripts/compress_textures.sh
+        working-directory: ./avatar
+        env:
+          TEXTURE_PATH: ./${{ inputs.textures_path }}
+      - name: Enable problem matcher
+        run: echo ::add-matcher::compress_textures.json
+        working-directory: ./compressor/src/problem_matchers
+      - name: Warn overcolored textures
+        run: cat ~/pngquant.log | awk -f ./warn_overcolored_textures.awk
+        working-directory: ./compressor/src/scripts
+      - name: Disable problem matcher
+        run: echo '::remove-matcher owner=compress_textures::'
+      - name: Get compressed textures
+        id: get_compressed_textures
+        run: sh ./get_compressed_textures.sh
+        working-directory: ./compressor/src/scripts
+      - name: Upload compressed textures
+        if: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: compressed_textures
+          path: ./avatar/${{ inputs.textures_path }}
+  replace_textures:
+    name: Replace textures embedded in model files
+    needs: compress_textures
+    if: ${{ needs.compress_textures.outputs.texture_compressed }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout compressor repository
+        uses: actions/checkout@v4.2.2
+        with:
+          repository: Gakuto1112/FiguraAvatarTextureCompressor
+          path: ./compressor
+      - name: Checkout avatar repository
+        uses: actions/checkout@v4.2.2
+        with:
+          path: ./avatar
+          ref: ${{ inputs.target_branch }}
+      - name: Setup Node.js @ v20.12.0
+        uses: actions/setup-node@v4.2.0
+        with:
+          node-version: 20.12.0
+          cache: npm
+          cache-dependency-path: ./compressor/src/embed_texture_replacer/package-lock.json
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./compressor/src/embed_texture_replacer
+      - name: Compile TypeScript sources
+        run: node_modules/.bin/tsc ./replace_embedded_textures.ts
+        working-directory: ./compressor/src/embed_texture_replacer
+      - name: Remove previous textures
+        run: rm -rf ./textures
+        working-directory: ./avatar
+      - name: Download compressed textures
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: compressed_textures
+          path: ./avatar/textures
+      - name: Convert compressed textures into base64 strings
+        run: sh ~/compressor/src/scripts/get_compressed_textures.sh
+        working-directory: ./avatar
+        env:
+          COMPRESSED_TEXTURES: ${{ needs.compress_textures.outputs.compressed_textures }}
+          TEXTURE_PATH: ~/avatar/${{ inputs.textures_path }}
+      - name: Replace embedded textures
+        run: node ./replace_embedded_textures.js ~/avatar/${MODEL_PATH} ~/base64_textures
+        working-directory: ./compressor/src/embed_texture_replacer
+        env:
+          MODEL_PATH: ~/avatar/${{ inputs.models_path }}
+      - name: Upload processed models
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: processed_models
+          path: ./avatar/${{ inputs.models_path }}
+  commit_and_push:
+    name: Commit and Push
+    needs:
+      - compress_textures
+      - replace_textures
+    if: ${{ needs.compress_textures.outputs.texture_compressed }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout avatar repository
+        uses: actions/checkout@v4.2.2
+        with:
+          ref: ${{ inputs.target_branch }}
+      - name: Remove previous data
+        run: |
+          rm -rf ./textures
+          rm -rf ./models
+      - name: Download compressed textures
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: compressed_textures
+          path: ./textures
+      - name: Download processed models
+        uses: actions/download-artifact@v4.1.9
+        with:
+          name: processed_models
+          path: ./models
+      - name: Commit and Push
+        run: |
+          git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git add --all
+          git commit -m '[GitHub Actions] テクスチャの圧縮' -m '対象のコミット: ${{ github.sha }}'
+          git push origin

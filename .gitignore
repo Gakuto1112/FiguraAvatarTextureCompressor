@@ -1,1 +1,3 @@
 .vscode/
+src/embed_texture_replacer/replace_embedded_textures.js
+src/embed_texture_replacer/node_modules/

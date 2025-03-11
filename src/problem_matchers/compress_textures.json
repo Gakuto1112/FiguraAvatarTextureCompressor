@@ -1,0 +1,15 @@
+{
+    "problemMatcher": [
+        {
+            "owner": "compress_textures",
+            "pattern": [
+                {
+                    "regexp": "^\\[(Warn)\\s:\\s(\\d+)\\]:\\s(.+)$",
+                    "severity": 1,
+                    "line": 2,
+                    "message": 3
+                }
+            ]
+        }
+    ]
+}
