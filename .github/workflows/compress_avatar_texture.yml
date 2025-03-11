@@ -36,6 +36,10 @@ jobs:
           ref: ${{ inputs.target_branch }}
       - name: Enable problem matcher
         run: echo ::add-matcher::./compressor/src/problem_matchers/check_paths.json
+      - run: |
+          cd ~
+          pwd
+          ls
       - name: Check if specified path exists
         run: sh ./check_paths.sh
         working-directory: ./compressor/src/scripts
