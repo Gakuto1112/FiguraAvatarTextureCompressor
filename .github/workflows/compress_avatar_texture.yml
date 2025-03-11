@@ -36,17 +36,11 @@ jobs:
           ref: ${{ inputs.target_branch }}
       - name: Enable problem matcher
         run: echo ::add-matcher::./compressor/src/problem_matchers/check_paths.json
-      - run: |
-          cd ~
-          pwd
-          ls
-          ls ~/avatar/
       - name: Check if specified path exists
-        run: sh ./check_paths.sh
-        working-directory: ./compressor/src/scripts
+        run: sh ./compressor/src/scripts/check_paths.sh
         env:
-          TEXTURE_PATH: ~/avatar/${{ inputs.textures_path }}
-          MODEL_PATH: ~/avatar/${{ inputs.models_path }}
+          TEXTURE_PATH: ./avatar/${{ inputs.textures_path }}
+          MODEL_PATH: ./avatar/${{ inputs.models_path }}
       - name: Disable problem matcher
         run: echo '::remove-matcher owner=check_paths::'
   compress_textures:
@@ -68,21 +62,18 @@ jobs:
           path: ./avatar
           ref: ${{ inputs.target_branch }}
       - name: Compress textures
-        run: sh ~/compressor/src/scripts/compress_textures.sh
-        working-directory: ./avatar
+        run: sh ./compressor/src/scripts/compress_textures.sh
         env:
           TEXTURE_PATH: ./${{ inputs.textures_path }}
       - name: Enable problem matcher
         run: echo ::add-matcher::./compressor/src/problem_matchers/compress_textures.json
       - name: Warn overcolored textures
-        run: cat ~/pngquant.log | awk -f ./warn_overcolored_textures.awk
-        working-directory: ./compressor/src/scripts
+        run: cat ./pngquant.log | awk -f ./compressor/src/scripts/warn_overcolored_textures.awk
       - name: Disable problem matcher
         run: echo '::remove-matcher owner=compress_textures::'
       - name: Get compressed textures
         id: get_compressed_textures
-        run: sh ./get_compressed_textures.sh
-        working-directory: ./compressor/src/scripts
+        run: sh ./compressor/src/scripts/get_compressed_textures.sh
       - name: Upload compressed textures
         if: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
         uses: actions/upload-artifact@v4.6.1
@@ -126,16 +117,14 @@ jobs:
           name: compressed_textures
           path: ./avatar/textures
       - name: Convert compressed textures into base64 strings
-        run: sh ~/compressor/src/scripts/get_compressed_textures.sh
-        working-directory: ./avatar
+        run: sh ./compressor/src/scripts/convert_to_base64.sh
         env:
           COMPRESSED_TEXTURES: ${{ needs.compress_textures.outputs.compressed_textures }}
-          TEXTURE_PATH: ~/avatar/${{ inputs.textures_path }}
+          TEXTURE_PATH: ./avatar/${{ inputs.textures_path }}
       - name: Replace embedded textures
-        run: node ./replace_embedded_textures.js ~/avatar/${MODEL_PATH} ~/base64_textures
-        working-directory: ./compressor/src/embed_texture_replacer
+        run: node ./replace_embedded_textures.js ./avatar/${MODEL_PATH} ./base64_textures
         env:
-          MODEL_PATH: ~/avatar/${{ inputs.models_path }}
+          MODEL_PATH: ./avatar/${{ inputs.models_path }}
       - name: Upload processed models
         uses: actions/upload-artifact@v4.6.1
         with:
