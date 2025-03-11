@@ -80,7 +80,7 @@ jobs:
         if: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
         uses: actions/upload-artifact@v4.6.1
         with:
-          name: compressed_textures
+          name: compressed_textures_${{ inputs.target_branch }}
           path: ./avatar/${{ inputs.textures_path }}
   replace_textures:
     name: Replace textures embedded in model files
@@ -116,7 +116,7 @@ jobs:
       - name: Download compressed textures
         uses: actions/download-artifact@v4.1.9
         with:
-          name: compressed_textures
+          name: compressed_textures_${{ inputs.target_branch }}
           path: ./avatar/textures
       - name: Convert compressed textures into base64 strings
         run: sh ./compressor/src/scripts/convert_to_base64.sh
@@ -130,7 +130,7 @@ jobs:
       - name: Upload processed models
         uses: actions/upload-artifact@v4.6.1
         with:
-          name: processed_models
+          name: processed_models_${{ inputs.target_branch }}
           path: ./avatar/${{ inputs.models_path }}
   commit_and_push:
     name: Commit and Push
@@ -151,12 +151,12 @@ jobs:
       - name: Download compressed textures
         uses: actions/download-artifact@v4.1.9
         with:
-          name: compressed_textures
+          name: compressed_textures_${{ inputs.target_branch }}
           path: ./textures
       - name: Download processed models
         uses: actions/download-artifact@v4.1.9
         with:
-          name: processed_models
+          name: processed_models_${{ inputs.target_branch }}
           path: ./models
       - name: Commit and Push
         run: |
