@@ -51,8 +51,8 @@ jobs:
       texture_compressed: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
       compressed_textures: ${{ steps.get_compressed_textures.outputs.compressed_textures }}
     steps:
-      - name: Install pngquant
-        run: sudo apt install -y pngquant
+      - name: Install pngquant and gawk
+        run: sudo apt install -y pngquant gawk
       - name: Checkout compressor repository
         uses: actions/checkout@v4.2.2
         with:
@@ -124,9 +124,9 @@ jobs:
           COMPRESSED_TEXTURES: ${{ needs.compress_textures.outputs.compressed_textures }}
           TEXTURE_PATH: ./avatar/${{ inputs.textures_path }}
       - name: Replace embedded textures
-        run: node ./replace_embedded_textures.js ./avatar/${MODEL_PATH} ./base64_textures
+        run: node ./compressor/src/embed_texture_replacer/replace_embedded_textures.js ./avatar/${MODEL_PATH} ./base64_textures
         env:
-          MODEL_PATH: ./avatar/${{ inputs.models_path }}
+          MODEL_PATH: ${{ inputs.models_path }}
       - name: Upload processed models
         uses: actions/upload-artifact@v4.6.1
         with:
