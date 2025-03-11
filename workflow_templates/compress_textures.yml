@@ -11,6 +11,6 @@ jobs:
     name: Compress avatar textures
     permissions:
       contents: write
-    uses: Gakuto1112/FiguraAvatarTextureCompressor/src/compress_avatar_texture.yml@main
+    uses: Gakuto1112/FiguraAvatarTextureCompressor/.github/workflows/compress_avatar_texture.yml@main
     with:
       target_branch: ${{ github.ref_name }}
