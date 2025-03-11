@@ -1,3 +1,5 @@
+no_directory_ditected=false
+
 if [ ! -d ${TEXTURE_PATH} ]; then
     echo "[Error]: Cannot find directory \"${TEXTURE_PATH}\""
     no_directory_ditected=true
