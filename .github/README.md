@@ -55,7 +55,7 @@ pngquantでは、png画像のカラーモードをフルカラーからインデ
 任意、string
 
 アバターのモデルが格納されたディレクトリを指定します。
-省略した場合、`modelss/`になります。
+省略した場合、`models/`になります。
 
 > [!NOTE]
 > `textures_path`と`models_path`のデフォルト値は[こちらのアバターテンプレート](https://github.com/Gakuto1112/FiguraAvatarTemplate)に準拠しています。
