@@ -51,6 +51,8 @@ jobs:
       texture_compressed: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
       compressed_textures: ${{ steps.get_compressed_textures.outputs.compressed_textures }}
     steps:
+      - name: Install pngquant
+        run: sudo apt install -y pngquant
       - name: Checkout compressor repository
         uses: actions/checkout@v4.2.2
         with:
