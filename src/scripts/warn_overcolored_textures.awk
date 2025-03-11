@@ -8,7 +8,7 @@
     if(match($0, /^\s\smade\shistogram\.\.\.([0-9]+)\scolors\sfound$/, matched_str) && length(file_name) >= 1) {
         color_num = strtonum(matched_str[1])
         if(color_num > 256) {
-            print "[Warn]: \"" file_name "\" has " color_num " colors and reduced to 256 colors."
+            print "[Warning]: \"" file_name "\" has " color_num " colors and reduced to 256 colors."
         }
     }
 }

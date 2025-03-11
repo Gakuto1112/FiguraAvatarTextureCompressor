@@ -4,7 +4,7 @@
             "owner": "compress_textures",
             "pattern": [
                 {
-                    "regexp": "^\\[(Warn)\\]:\\s(.+)$",
+                    "regexp": "^\\[(Warning)\\]:\\s(.+)$",
                     "severity": 1,
                     "message": 2
                 }
