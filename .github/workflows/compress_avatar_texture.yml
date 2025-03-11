@@ -40,6 +40,7 @@ jobs:
           cd ~
           pwd
           ls
+          ls ~/avatar/
       - name: Check if specified path exists
         run: sh ./check_paths.sh
         working-directory: ./compressor/src/scripts
