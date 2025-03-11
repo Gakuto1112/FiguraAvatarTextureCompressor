@@ -1,4 +1,4 @@
-import fs from "fs";
+import * as fs from 'fs'
 
 /**
  * 読み込んだbase64画像を一時保持するキャッシュ
