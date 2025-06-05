@@ -74,7 +74,7 @@ jobs:
         run: sh ./compressor/src/scripts/get_compressed_textures.sh
       - name: Upload compressed textures
         if: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: compressed_textures_${{ inputs.target_branch }}
           path: ./avatar/${{ inputs.textures_path }}
@@ -95,7 +95,7 @@ jobs:
           path: ./avatar
           ref: ${{ inputs.target_branch }}
       - name: Setup Node.js @ v20.12.0
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v4.4.0
         with:
           node-version: 20.12.0
           cache: npm
@@ -110,7 +110,7 @@ jobs:
         run: rm -rf ./textures
         working-directory: ./avatar
       - name: Download compressed textures
-        uses: actions/download-artifact@v4.1.9
+        uses: actions/download-artifact@v4.3.0
         with:
           name: compressed_textures_${{ inputs.target_branch }}
           path: ./avatar/textures
@@ -124,7 +124,7 @@ jobs:
         env:
           MODEL_PATH: ${{ inputs.models_path }}
       - name: Upload processed models
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: processed_models_${{ inputs.target_branch }}
           path: ./avatar/${{ inputs.models_path }}
@@ -145,12 +145,12 @@ jobs:
           rm -rf ./textures
           rm -rf ./models
       - name: Download compressed textures
-        uses: actions/download-artifact@v4.1.9
+        uses: actions/download-artifact@v4.3.0
         with:
           name: compressed_textures_${{ inputs.target_branch }}
           path: ./textures
       - name: Download processed models
-        uses: actions/download-artifact@v4.1.9
+        uses: actions/download-artifact@v4.3.0
         with:
           name: processed_models_${{ inputs.target_branch }}
           path: ./models
