@@ -68,7 +68,7 @@ jobs:
         id: get_overcolored_textures
         run: sh ./compressor/src/scripts/get_overcolored_textures.sh
       - name: Comment to the target commitment
-        if: ${{ steps.get_overcolored_textures.outputs.texture_overcolored }}
+        if: ${{ steps.get_overcolored_textures.outputs.texture_overcolored == 'true' }}
         run: sh ./compressor/src/scripts/comment_overcolored_warings.sh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -78,7 +78,7 @@ jobs:
         id: get_compressed_textures
         run: sh ./compressor/src/scripts/get_compressed_textures.sh
       - name: Upload compressed textures
-        if: ${{ steps.get_compressed_textures.outputs.texture_compressed }}
+        if: ${{ steps.get_compressed_textures.outputs.texture_compressed == 'true' }}
         uses: actions/upload-artifact@v4.6.2
         with:
           name: compressed_textures_${{ inputs.target_branch }}
@@ -86,7 +86,7 @@ jobs:
   replace_textures:
     name: Replace textures embedded in model files
     needs: compress_textures
-    if: ${{ needs.compress_textures.outputs.texture_compressed }}
+    if: ${{ needs.compress_textures.outputs.texture_compressed == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout compressor repository
@@ -138,7 +138,7 @@ jobs:
     needs:
       - compress_textures
       - replace_textures
-    if: ${{ needs.compress_textures.outputs.texture_compressed }}
+    if: ${{ needs.compress_textures.outputs.texture_compressed == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout avatar repository
