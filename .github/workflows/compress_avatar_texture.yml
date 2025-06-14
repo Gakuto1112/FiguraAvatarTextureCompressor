@@ -71,7 +71,7 @@ jobs:
         if: ${{ steps.get_overcolored_textures.outputs.texture_overcolored }}
         run: sh ./compressor/src/scripts/comment_overcolored_warings.sh
         env:
-          TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           TARGET_COMMIT: ${{ github.sha }}
       - name: Get compressed textures
