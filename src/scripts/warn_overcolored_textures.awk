@@ -9,7 +9,7 @@
         color_num = strtonum(matched_str[1])
         if(color_num > 256) {
             sub(/\.\/avatar\//, "", file_name)
-            print "[Warning]: \"" file_name "\" has " color_num " colors and reduced to 256 colors."
+            print file_name, color_num
         }
     }
 }

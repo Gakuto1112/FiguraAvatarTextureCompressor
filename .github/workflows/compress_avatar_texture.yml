@@ -63,12 +63,16 @@ jobs:
         run: sh ./compressor/src/scripts/compress_textures.sh
         env:
           TEXTURE_PATH: ${{ inputs.textures_path }}
-      - name: Enable problem matcher
-        run: echo ::add-matcher::./compressor/src/problem_matchers/compress_textures.json
-      - name: Warn overcolored textures
-        run: cat ./pngquant.log | awk -f ./compressor/src/scripts/warn_overcolored_textures.awk
-      - name: Disable problem matcher
-        run: echo '::remove-matcher owner=compress_textures::'
+      - name: Get overcolored textures
+        id: get_overcolored_textures
+        run: sh ./compressor/src/scripts/get_overcolored_textures.sh
+      - name: Comment to the target commitment
+        if: ${{ steps.get_overcolored_textures.outputs.texture_overcolored }}
+        run: sh ./compressor/src/scripts/comment_overcolored_warings.sh
+        env:
+          TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TARGET_COMMIT: ${{ github.sha }}
       - name: Get compressed textures
         id: get_compressed_textures
         run: sh ./compressor/src/scripts/get_compressed_textures.sh
@@ -156,9 +160,13 @@ jobs:
           path: ./models
       - name: Commit and Push
         run: |
-          git remote set-url origin https://github-actions:${{ github.token }}@github.com/${{ github.repository }}
+          git remote set-url origin https://github-actions:${TOKEN}@github.com/${REPOSITORY}
           git config user.name github-actions[bot]
           git config user.email github-actions[bot]@users.noreply.github.com
           git add --all
-          git commit -m '[GitHub Actions] テクスチャの圧縮' -m '対象のコミット: ${{ github.sha }}'
+          git commit -m '[GitHub Actions] テクスチャの圧縮' -m '対象のコミット: ${TARGET_COMMIT}'
           git push origin
+        env:
+          TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TARGET_COMMIT: ${{ github.sha }}
