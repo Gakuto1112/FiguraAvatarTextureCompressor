@@ -22,7 +22,7 @@ function replaceEmbeddedTextures(modelPath: string, base64TexturePath: string): 
                 cache[modelData["name"]] = base64TextureData;
             }
         });
-        fs.writeFileSync(`${entry.parentPath}/${entry.name}`, JSON.stringify(modelData, null, "\t").replace(/\[[^\[\]{}]+\]/g, (substring: string) => substring.length <= 153 ? substring.replace(/\n\s*/g, "").replace(/,/g, ", ") : substring), {encoding: "utf-8"});
+        fs.writeFileSync(`${entry.parentPath}/${entry.name}`, JSON.stringify(modelData, null, "\t").replace(/\[[^\[\]{}]+\]/g, (substring: string) => substring.replace(/\n\s*/g, "").length <= 118 ? substring.replace(/\n\s*/g, "").replace(/,/g, ", ") : substring), {encoding: "utf-8"});
     });
 }
 
